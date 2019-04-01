@@ -32,13 +32,16 @@ sigs.input <- mut.to.sigs.input(mut.ref = mut.sig.ref,
                                 ref = "ref", 
                                 alt = "alt")
 
-sigs.which = whichSignatures(tumor.ref = sigs.input, 
+sigs.which <- whichSignatures(tumor.ref = sigs.input, 
                        signatures.ref = signatures.nature2013, 
                        sample.id = "311252-S",
                        contexts.needed = TRUE)
 
+sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
+
 plotSignatures(sigs.which, sub = 'example')
 
+makePie(sigs.which, sub = 'example')
 
 
 
