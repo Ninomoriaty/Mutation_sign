@@ -1,4 +1,5 @@
 # packages
+# dependencies of deconstructSigs
 library(reshape2)
 library(BSgenome)
 library(BSgenome.Hsapiens.UCSC.hg19)
@@ -7,14 +8,16 @@ library(grDevices)
 library(graphics)
 library(utils)
 library(deconstructSigs)
+# data frame needed
 library(plyr)
 
-maf_file = "/home/ninomoriaty/R_Project/311252_snv_indel.imputed.maf"
-branch_file = "/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/311252.NJtree.edges.txt"
+# input directory
+# maf_file = "/home/ninomoriaty/R_Project/311252_snv_indel.imputed.maf"
+# branch_file = "/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/311252.NJtree.edges.txt"
 
 # main function
 # Usage: Mutational_Sigs_branch(maf_file, samples_vector)
-Mutational_sigs_tree <- function(maf_file, branches){
+Mutational_sigs_tree <- function(maf_file, branch_file){
   # read .maf file
   maf_input <- read.table(maf_file, quote = "", header = TRUE, fill = TRUE, sep = '\t')
   # get mutationalSigs-related  infomation
