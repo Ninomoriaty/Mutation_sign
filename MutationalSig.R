@@ -12,8 +12,8 @@ library(deconstructSigs)
 library(plyr)
 
 # input directory
-# maf_file = "/home/ninomoriaty/R_Project/311252_snv_indel.imputed.maf"
-# branch_file = "/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/311252.NJtree.edges.txt"
+maf_file = "/home/ninomoriaty/R_Project/311252_snv_indel.imputed.maf"
+branch_file = "/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/311252.NJtree.edges.txt"
 
 # main function
 # Usage: Mutational_Sigs_branch(maf_file, samples_vector)
@@ -64,7 +64,7 @@ Mutational_sigs_branch <- function(mut.branch, branch_name){
                                   alt = "alt")
   
   sigs.which <- whichSignatures(tumor.ref = sigs.input, 
-                                signatures.ref = signatures.nature2013, 
+                                signatures.ref = signatures.cosmic, 
                                 sample.id = branch_name,
                                 contexts.needed = TRUE)
   
@@ -72,6 +72,10 @@ Mutational_sigs_branch <- function(mut.branch, branch_name){
   print(paste(branch_name, ":", sigs.max))
 }
 
+# sigs.which output
+# setwd("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign")
+# write.csv(x = sigs.which, file = "output.csv")
+# write.table(sigs.which,file="output2.txt")
 
 # Confirm sets of mutation
 
