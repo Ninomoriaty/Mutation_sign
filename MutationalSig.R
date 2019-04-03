@@ -38,8 +38,8 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
   branch_input <- gsub("\xa1\xc9", ID_prefix, readLines(branch_file))
   branches <- strsplit(as.character(paste(patientID, "-", branch_input, sep = "")), split=" ")
   
-  # result collection
-  mut.sigs.result <- data.frame()
+  # output collection
+  mut.sigs.output <- data.frame()
   
   # generate sets of different branches
   for (branch_counter in length(branches):1){
@@ -51,14 +51,14 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
     }
     branch_name <- paste(branch, collapse = "+")
     mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
-    mut.sigs.result <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.result, branch, branch_name)
+    mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name)
   }
-  mut.sigs.result
+  mut.sigs.output
 }
 
   
 # Weight mutational Signature of each branch
-Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.result, branch, branch_name){
+Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name){
   # deconstructSigs
   sigs.input <- mut.to.sigs.input(mut.ref = mut.sig.ref, 
                                   sample.id = "Sample", 
@@ -74,7 +74,7 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.result, branch, branch_
   
   sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
   mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max)
-  rbind(mut.sigs.result, mut.sigs.branch)
+  rbind(mut.sigs.output, mut.sigs.branch)
 }
 
 # sigs.which output
