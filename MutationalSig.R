@@ -79,11 +79,11 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
 
 # sigs.which output
 # setwd("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign")
-# write.csv(x = sigs.which, file = "output.csv")
-# write.table(sigs.which,file="output2.txt")
+# write.csv(x = result, file = "output.csv")
+# write.table(result,file="output2.txt")
+# sigs <- read.table("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/output2.txt", stringsAsFactors=F, quote = "", header = TRUE, fill = TRUE, sep = ' ')
 
 # Confirm sets of mutation
-
 # Mutation_sets <- function(mut.sig.ref, branches){
 #   # generate branch name
 #   for (branch_counter in 1:length(branches)){
