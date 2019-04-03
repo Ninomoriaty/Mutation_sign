@@ -51,14 +51,14 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
     }
     branch_name <- paste(branch, collapse = "+")
     mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
-    mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name)
+    mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID)
   }
   mut.sigs.output
 }
 
   
 # Weight mutational Signature of each branch
-Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name){
+Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID){
   # deconstructSigs
   sigs.input <- mut.to.sigs.input(mut.ref = mut.sig.ref, 
                                   sample.id = "Sample", 
@@ -71,8 +71,8 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
                                 signatures.ref = signatures.cosmic, 
                                 sample.id = branch_name,
                                 contexts.needed = TRUE)
-  
   sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
+  branch <- gsub(paste(patientID,"-",sep=""), "", branch)
   mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max)
   rbind(mut.sigs.output, mut.sigs.branch)
 }
