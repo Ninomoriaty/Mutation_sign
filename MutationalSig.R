@@ -32,11 +32,14 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
   mut.sig.ref <- data.frame(dat.num, dat.sample, dat.chr, dat.pos.start, dat.pos.end, dat.ref, dat.alt)
   colnames(mut.sig.ref) <- c("ID", "Sample", "chr", "pos", "pos_end", "ref", "alt")
   
+  # branch info
   patientID = strsplit(as.character(maf_input$Tumor_Sample_Barcode[1]), "-")[[1]][1]
   ID_prefix = paste(" ", patientID, "-", sep = "")
-  
   branch_input <- gsub("\xa1\xc9", ID_prefix, readLines(branch_file))
   branches <- strsplit(as.character(paste(patientID, "-", branch_input, sep = "")), split=" ")
+  
+  # result collection
+  mut.sigs.result <- data.frame()
   
   # generate sets of different branches
   for (branch_counter in length(branches):1){
@@ -48,15 +51,16 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
     }
     branch_name <- paste(branch, collapse = "+")
     mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
-    Mutational_sigs_branch(mut.sig.ref, branch_name)
+    mut.sigs.result <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.result, branch, branch_name)
   }
+  mut.sigs.result
 }
 
   
 # Weight mutational Signature of each branch
-Mutational_sigs_branch <- function(mut.branch, branch_name){
+Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.result, branch, branch_name){
   # deconstructSigs
-  sigs.input <- mut.to.sigs.input(mut.ref = mut.branch, 
+  sigs.input <- mut.to.sigs.input(mut.ref = mut.sig.ref, 
                                   sample.id = "Sample", 
                                   chr = "chr", 
                                   pos = "pos", 
@@ -69,7 +73,8 @@ Mutational_sigs_branch <- function(mut.branch, branch_name){
                                 contexts.needed = TRUE)
   
   sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
-  print(paste(branch_name, ":", sigs.max))
+  mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max)
+  rbind(mut.sigs.result, mut.sigs.branch)
 }
 
 # sigs.which output
