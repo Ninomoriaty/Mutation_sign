@@ -1,4 +1,19 @@
-# packages
+#' Check Mutational Signature for each branch of phylogenetic tree
+#' @description Read maf file as data.frame. Define branches' set relationship by re-labeling their tumor sample 
+#' barcode from the smallest set. Calcualte each branch's mutational signature weight according to cosmic reference
+#' and pick the maxium. Return a data frame of each set/branch's mutational signature.
+#' 
+#' @param maf_file specify a maf document/directory as the input of the function
+#' @param branch_file specify a txt document/directory as the input of the branches (needed to be refined)
+#' @return data frame of each set/branch's mutational signature.
+#'
+#' @examples
+#' \dontrun{
+#' Mutational_sigs_tree(maf_file, branch_file)
+#'}
+
+
+# import pkgs
 # dependencies of deconstructSigs
 library(reshape2)
 library(BSgenome)
@@ -12,8 +27,8 @@ library(deconstructSigs)
 library(plyr)
 
 # input directory
-maf_file = "/home/ninomoriaty/R_Project/311252_snv_indel.imputed.maf"
-branch_file = "/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/311252.NJtree.edges.txt"
+# maf_file = "/home/ninomoriaty/R_Project/311252_snv_indel.imputed.maf"
+# branch_file = "/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/311252.NJtree.edges.txt"
 
 # main function
 # Usage: Mutational_Sigs_branch(maf_file, samples_vector)
@@ -32,27 +47,34 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
   mut.sig.ref <- data.frame(dat.num, dat.sample, dat.chr, dat.pos.start, dat.pos.end, dat.ref, dat.alt)
   colnames(mut.sig.ref) <- c("ID", "Sample", "chr", "pos", "pos_end", "ref", "alt")
   
-  # branch info
+  # Synchronize sample name with mut.sig.ref
   patientID = strsplit(as.character(maf_input$Tumor_Sample_Barcode[1]), "-")[[1]][1]
   ID_prefix = paste(" ", patientID, "-", sep = "")
+  
+  # get branch infomation
   branch_input <- gsub("\xa1\xc9", ID_prefix, readLines(branch_file))
   branches <- strsplit(as.character(paste(patientID, "-", branch_input, sep = "")), split=" ")
   
   # output collection
   mut.sigs.output <- data.frame()
   
-  # generate sets of different branches
+  # generate mutational signautres for different branches
   for (branch_counter in length(branches):1){
+    # generate a single branch
     branch <- Filter(Negate(is.na), branches[[branch_counter]])
     mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample %in% branch), ]
     for (tsb in branch){
+      # generate the intersection(set) of the branch
       mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
       mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
     }
+    # label the intersection(set) of the branch
     branch_name <- paste(branch, collapse = "+")
     mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
+    # get the mutational signature of the branch
     mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID)
   }
+  # return the data frame of mutational signature for all branches
   mut.sigs.output
 }
 
@@ -66,12 +88,13 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
                                   pos = "pos", 
                                   ref = "ref", 
                                   alt = "alt")
-  
   sigs.which <- whichSignatures(tumor.ref = sigs.input, 
                                 signatures.ref = signatures.cosmic, 
                                 sample.id = branch_name,
                                 contexts.needed = TRUE)
+  # get mutational signature with max weight
   sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
+  # simplify branch names and store as a list with mutational signature
   branch <- gsub(paste(patientID,"-",sep=""), "", branch)
   mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max)
   rbind(mut.sigs.output, mut.sigs.branch)
