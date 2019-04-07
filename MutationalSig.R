@@ -26,10 +26,6 @@ library(deconstructSigs)
 # data frame needed
 library(plyr)
 
-# input directory
-# maf_file = "/home/ninomoriaty/R_Project/311252_snv_indel.imputed.maf"
-# branch_file = "/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/311252.NJtree.edges.txt"
-
 # main function
 # Usage: Mutational_Sigs_branch(maf_file, samples_vector)
 Mutational_sigs_tree <- function(maf_file, branch_file){
@@ -52,7 +48,7 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
   ID_prefix = paste(" ", patientID, "-", sep = "")
   
   # get branch infomation
-  branch_input <- gsub("\xa1\xc9", ID_prefix, readLines(branch_file))
+  branch_input <- gsub("∩", ID_prefix, readLines(branch_file))
   branches <- strsplit(as.character(paste(patientID, "-", branch_input, sep = "")), split=" ")
   
   # output collection
@@ -70,9 +66,14 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
     }
     # label the intersection(set) of the branch
     branch_name <- paste(branch, collapse = "+")
-    mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
-    # get the mutational signature of the branch
-    mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID)
+    if (length(mut.branch[,1]) == 0){
+      # fix the problem when no intersection found
+      next()
+    } else{
+      mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
+      # get the mutational signature of the branch
+      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID)
+    }
   }
   # return the data frame of mutational signature for all branches
   mut.sigs.output
@@ -100,11 +101,37 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
   rbind(mut.sigs.output, mut.sigs.branch)
 }
 
-# sigs.which output
-# setwd("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign")
-# write.csv(x = result, file = "output.csv")
-# write.table(result,file="output2.txt")
+###### output test ######
+# setwd("/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/results")
+# maf_file_ls = c(maf_file1, maf_file2, maf_file3, maf_file4, maf_file5, maf_file6, maf_file7)
+# branch_file_ls = c(branch_file1, branch_file2, branch_file3, branch_file4, branch_file5, branch_file6, branch_file7)
+# for (counter in 1:length(branch_file_ls)){
+#   result <- Mutational_sigs_tree(maf_file_ls[counter], branch_file_ls[counter])
+#   write.table(result, file=paste("output", counter,".txt", sep = ""))
+# }
+
 # sigs <- read.table("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/output2.txt", stringsAsFactors=F, quote = "", header = TRUE, fill = TRUE, sep = ' ')
+# 
+# maf_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.snv_indel.imputed.maf"
+# branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtree.edges"
+# 
+# maf_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.snv_indel.imputed.maf"
+# branch_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.NJtree.edges"
+# 
+# maf_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.snv_indel.imputed.maf"
+# branch_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.NJtree.edges"
+# 
+# maf_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.snv_indel.imputed.maf"
+# branch_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.NJtree.edges"
+# 
+# maf_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.snv_indel.imputed.maf"
+# branch_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.NJtree.edges"
+# 
+# maf_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.snv_indel.imputed.maf"
+# branch_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.NJtree.edges"
+# 
+# maf_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.snv_indel.imputed.maf"
+# branch_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.NJtree.edges"
 
 # Confirm sets of mutation
 # Mutation_sets <- function(mut.sig.ref, branches){
@@ -122,19 +149,4 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
 #   }
 #   mut.sig.ref
 # }
-
-# test branches
-
-# branch11 = data.frame(c("311252-S"))
-# branch10 = data.frame(c("311252-TP2-2"))
-# branch9 = data.frame(c("311252-TC2"))
-# branch8 = data.frame(c("311252-TP1"))
-# branch7 = data.frame(c("311252-TC1"))
-# branch6 = data.frame(c("311252-V"))
-# branch5 = data.frame(c("311252-TP2-2", "311252-S"))
-# branch4 = data.frame(c("311252-TP1", "311252-TC2"))
-# branch3 = data.frame(c("311252-TP1", "311252-TC2", "311252-V"))
-# branch2 = data.frame(c("311252-TP1", "311252-TC2", "311252-TP2-2", "311252-V", "311252-S"))
-# branch1 = data.frame(c("311252-TC1", "311252-TP1", "311252-TC2", "311252-TP2-2", "311252-V", "311252-S"))
-# branches =  rbind.fill(branch1, branch2, branch3, branch4, branch5, branch6, branch7, branch8, branch9, branch10, branch11)
 
