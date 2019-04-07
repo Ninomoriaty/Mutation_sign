@@ -28,9 +28,7 @@ library(plyr)
 
 # main function
 # Usage: Mutational_Sigs_branch(maf_file, samples_vector)
-Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir){
-  # read putative driver genes' list
-  driver_genes <- as.character(read.table(driver_genes_dir)[,1])
+Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE){
   # read .maf file
   maf_input <- read.table(maf_file, quote = "", header = TRUE, fill = TRUE, sep = '\t')
   # get mutationalSigs-related  infomation
@@ -78,7 +76,7 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir){
       # label the intersection(set) of the branch
       mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
       # get the mutational signature of the branch
-      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes)
+      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir)
     }
     
   }
@@ -88,7 +86,7 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir){
 
   
 # Weight mutational Signature of each branch
-Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes){
+Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir){
   # deconstructSigs
   sigs.input <- mut.to.sigs.input(mut.ref = mut.sig.ref, 
                                   sample.id = "Sample", 
@@ -103,20 +101,29 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
   # get mutational signature with max weight
   sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
   
-  # figure out putative driver genes
-  pdg.mut <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name &
-                                 as.character(mut.sig.ref$Hugo_Symbol) %in% driver_genes),]
-  pdg.branch <- as.character(pdg.mut$Hugo_Symbol)
-  
-  # simplify branch names and store as a list with mutational signature
+  # vectorize branch name
   branch <- gsub(paste(patientID,"-",sep=""), "", branch)
-  mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max, putative_driver_genes = I(list(pdg.branch)))
+  
+  # figure out putative driver genes
+  if (typeof(driver_genes_dir) == "character"){
+    # read putative driver genes' list
+    driver_genes <- as.character(read.table(driver_genes_dir)[,1])
+    # filter potative driver genes of each branch
+    pdg.mut <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name &
+                                   as.character(mut.sig.ref$Hugo_Symbol) %in% driver_genes),]
+    pdg.branch <- as.character(pdg.mut$Hugo_Symbol)
+    # collect branches' mutataional signature and potative driver genes information
+    mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max, putative_driver_genes = I(list(pdg.branch)))
+  } else{
+    mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max)
+  }
+  # collect branches' mutataional signature information
   rbind(mut.sigs.output, mut.sigs.branch)
 }
 
 
 ###### putative driver genes ######
-# driver_genes_dir <- "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/putative_driver_genes.txt"
+driver_genes_dir <- "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/putative_driver_genes.txt"
 
 ###### output test ######
 # setwd("/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/results")
