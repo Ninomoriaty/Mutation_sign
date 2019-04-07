@@ -28,7 +28,9 @@ library(plyr)
 
 # main function
 # Usage: Mutational_Sigs_branch(maf_file, samples_vector)
-Mutational_sigs_tree <- function(maf_file, branch_file){
+Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir){
+  # read putative driver genes' list
+  driver_genes <- as.character(read.table(driver_genes_dir)[,1])
   # read .maf file
   maf_input <- read.table(maf_file, quote = "", header = TRUE, fill = TRUE, sep = '\t')
   # get mutationalSigs-related  infomation
@@ -40,8 +42,9 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
   dat.ref <- maf_input[,7]
   dat.alt <- maf_input[,9]
   dat.num <- 1:length(dat.alt)
-  mut.sig.ref <- data.frame(dat.num, dat.sample, dat.chr, dat.pos.start, dat.pos.end, dat.ref, dat.alt)
-  colnames(mut.sig.ref) <- c("ID", "Sample", "chr", "pos", "pos_end", "ref", "alt")
+  dat.mutgene <-  maf_input$Hugo_Symbol
+  mut.sig.ref <- data.frame(dat.num, dat.sample, dat.chr, dat.pos.start, dat.pos.end, dat.ref, dat.alt, dat.mutgene)
+  colnames(mut.sig.ref) <- c("ID", "Sample", "chr", "pos", "pos_end", "ref", "alt", "Hugo_Symbol")
   
   # Synchronize sample name with mut.sig.ref
   patientID = strsplit(as.character(maf_input$Tumor_Sample_Barcode[1]), "-")[[1]][1]
@@ -59,21 +62,25 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
     # generate a single branch
     branch <- Filter(Negate(is.na), branches[[branch_counter]])
     mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample %in% branch), ]
+    
     for (tsb in branch){
       # generate the intersection(set) of the branch
       mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
       mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
     }
-    # label the intersection(set) of the branch
+    # generate the branch name
     branch_name <- paste(branch, collapse = "+")
+    
     if (length(mut.branch[,1]) == 0){
       # fix the problem when no intersection found
       next()
     } else{
+      # label the intersection(set) of the branch
       mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
       # get the mutational signature of the branch
-      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID)
+      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes)
     }
+    
   }
   # return the data frame of mutational signature for all branches
   mut.sigs.output
@@ -81,7 +88,7 @@ Mutational_sigs_tree <- function(maf_file, branch_file){
 
   
 # Weight mutational Signature of each branch
-Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID){
+Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes){
   # deconstructSigs
   sigs.input <- mut.to.sigs.input(mut.ref = mut.sig.ref, 
                                   sample.id = "Sample", 
@@ -95,11 +102,23 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
                                 contexts.needed = TRUE)
   # get mutational signature with max weight
   sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
+  
+  # figure out putative driver genes
+  pdg.mut <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name &
+                                 as.character(mut.sig.ref$Hugo_Symbol) %in% driver_genes),]
+  pdg.branch <- as.character(pdg.mut$Hugo_Symbol)
+  
   # simplify branch names and store as a list with mutational signature
   branch <- gsub(paste(patientID,"-",sep=""), "", branch)
-  mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max)
+  mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max, putative_driver_genes = I(list(pdg.branch)))
   rbind(mut.sigs.output, mut.sigs.branch)
 }
+
+
+###### putative driver genes ######
+driver_genes_dir <- "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/putative_driver_genes.txt"
+
+
 
 ###### output test ######
 # setwd("/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/results")
@@ -112,8 +131,8 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
 
 # sigs <- read.table("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/output2.txt", stringsAsFactors=F, quote = "", header = TRUE, fill = TRUE, sep = ' ')
 # 
-# maf_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.snv_indel.imputed.maf"
-# branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtree.edges"
+maf_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.snv_indel.imputed.maf"
+branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtree.edges"
 # 
 # maf_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.snv_indel.imputed.maf"
 # branch_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.NJtree.edges"
