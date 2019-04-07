@@ -116,9 +116,7 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
 
 
 ###### putative driver genes ######
-driver_genes_dir <- "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/putative_driver_genes.txt"
-
-
+# driver_genes_dir <- "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/putative_driver_genes.txt"
 
 ###### output test ######
 # setwd("/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/results")
