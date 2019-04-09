@@ -107,7 +107,7 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
   # figure out putative driver genes
   if (typeof(driver_genes_dir) == "character"){
     # read putative driver genes' list
-    driver_genes <- as.character(read.table(driver_genes_dir)[,1])
+    driver_genes <- as.character(read.table(driver_genes_dir, quote = "")[,1])
     # filter potative driver genes of each branch
     pdg.mut <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name &
                                    as.character(mut.sig.ref$Hugo_Symbol) %in% driver_genes),]
