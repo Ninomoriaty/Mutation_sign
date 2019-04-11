@@ -60,12 +60,12 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
     # generate a single branch
     branch <- Filter(Negate(is.na), branches[[branch_counter]])
     mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample %in% branch), ]
-    
-    # for (tsb in branch){
-    #   # generate the intersection(set) of the branch
-    #   mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
-    #   mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
-    # }
+
+    for (tsb in branch){
+      # generate the intersection(set) of the branch
+      mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
+      mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
+    }
     
     # generate the branch name
     branch_name <- paste(branch, collapse = "+")
@@ -76,8 +76,13 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
     } else{
       # label the intersection(set) of the branch
       mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
-      mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name & !duplicated(mut.sig.ref[,2:5])),]
-      mut.branches <- rbind(mut.branches, mut.branch)
+      mut.branch.intersection <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name 
+                                      & (!duplicated(mut.sig.ref$chr) 
+                                      | !duplicated(mut.sig.ref$pos)
+                                      | !duplicated(mut.sig.ref$pos_end)
+                                      | !duplicated(mut.sig.ref$ref)
+                                      | !duplicated(mut.sig.ref$ alt))),]
+      mut.branches <- rbind(mut.branches, mut.branch.intersection)
       # get the mutational signature of the branch
       ### However, this part could be optimized as sigs.input should be just calculated once. ###
       mut.sigs.output <- Mutational_sigs_branch(mut.branches, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir, mut.threshold)
@@ -165,11 +170,17 @@ branch_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.NJtr
 maf_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.snv_indel.imputed.maf"
 branch_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.NJtree.edges"
 
+# dir
+maf_file = maf_file1
+branch_file = branch_file1
+
 # data.mini
 data.name1 = c("wang","cheng","wei")
 data.power1 = c("end","end","promoter")
 minidata1 = data.frame(name=data.name1, power=data.power1)
 data.name2 = c("wang","cheng","wei")
-data.power2 = c("end","end","promoter2")
-minidata2 = data.frame(name=data.name2, power=data.power2)
+data.power2 = c("end","cheng2","wei")
+data.power3 = c("wang","wang","wei")
+minidata2 = data.frame(name=data.name2, power = data.power2, power3 = data.power3)
 match_df(minidata1, minidata2, on = c("name"))
+minidata2[which(minidata2$Spower3 == "wang" & !duplicated(minidata2[,1])),]
