@@ -89,7 +89,7 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
 # Weight mutational Signature of each branch
 Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir, mut.threshold){
   if (length(mut.sig.ref[which(mut.sig.ref$Sample == branch_name), 1]) < mut.threshold){
-    sigs.max <- "No Signature"
+    sigs.max <- "No.Signature"
   }else{
     # deconstructSigs
     sigs.input <- suppressWarnings(mut.to.sigs.input(mut.ref = mut.sig.ref, 
@@ -131,36 +131,36 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
 driver_genes_dir <- "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/putative_driver_genes.txt"
 
 ###### output test ######
-# setwd("/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/results")
-# maf_file_ls = c(maf_file1, maf_file2, maf_file3, maf_file4, maf_file5, maf_file6, maf_file7)
-# branch_file_ls = c(branch_file1, branch_file2, branch_file3, branch_file4, branch_file5, branch_file6, branch_file7)
-# for (counter in 1:length(branch_file_ls)){
-#   result <- Mutational_sigs_tree(maf_file_ls[counter], branch_file_ls[counter])
-#   write.table(result, file=paste("output", counter,".txt", sep = ""))
-# }
+setwd("/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/results")
+maf_file_ls = c(maf_file1, maf_file2, maf_file3, maf_file4, maf_file5, maf_file6, maf_file7)
+branch_file_ls = c(branch_file1, branch_file2, branch_file3, branch_file4, branch_file5, branch_file6, branch_file7)
+for (counter in 1:length(branch_file_ls)){
+  result <- Mutational_sigs_tree(maf_file_ls[counter], branch_file_ls[counter], mut.threshold = 30)
+  write.table(result, file=paste("output", counter,".txt", sep = ""))
+}
 
 # sigs <- read.table("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/output2.txt", stringsAsFactors=F, quote = "", header = TRUE, fill = TRUE, sep = ' ')
-# 
-# maf_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.snv_indel.imputed.maf"
-# branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtree.edges"
-# 
-# maf_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.snv_indel.imputed.maf"
-# branch_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.NJtree.edges"
-# 
-# maf_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.snv_indel.imputed.maf"
-# branch_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.NJtree.edges"
-# 
+#
+maf_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.snv_indel.imputed.maf"
+branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtree.edges"
+#
+maf_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.snv_indel.imputed.maf"
+branch_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.NJtree.edges"
+#
+maf_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.snv_indel.imputed.maf"
+branch_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.NJtree.edges"
+#
 maf_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.snv_indel.imputed.maf"
 branch_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.NJtree.edges"
-# 
-# maf_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.snv_indel.imputed.maf"
-# branch_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.NJtree.edges"
-# 
-# maf_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.snv_indel.imputed.maf"
-# branch_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.NJtree.edges"
-# 
-# maf_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.snv_indel.imputed.maf"
-# branch_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.NJtree.edges"
+#
+maf_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.snv_indel.imputed.maf"
+branch_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.NJtree.edges"
+#
+maf_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.snv_indel.imputed.maf"
+branch_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.NJtree.edges"
+#
+maf_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.snv_indel.imputed.maf"
+branch_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.NJtree.edges"
 
 # Confirm sets of mutation
 # Mutation_sets <- function(mut.sig.ref, branches){
