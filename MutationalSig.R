@@ -28,7 +28,7 @@ library(plyr)
 
 # main function
 # Usage: Mutational_Sigs_branch(maf_file, samples_vector)
-Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE){
+Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE, mut.threshold = 50){
   # read .maf file
   maf_input <- read.table(maf_file, quote = "", header = TRUE, fill = TRUE, sep = '\t')
   # get mutationalSigs-related  infomation
@@ -76,7 +76,8 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
       # label the intersection(set) of the branch
       mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
       # get the mutational signature of the branch
-      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir)
+      ### However, this part could be optimized as sigs.input should be just calculated once. ###
+      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir, mut.threshold)
     }
     
   }
@@ -86,20 +87,24 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
 
   
 # Weight mutational Signature of each branch
-Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir){
-  # deconstructSigs
-  sigs.input <- mut.to.sigs.input(mut.ref = mut.sig.ref, 
-                                  sample.id = "Sample", 
-                                  chr = "chr", 
-                                  pos = "pos", 
-                                  ref = "ref", 
-                                  alt = "alt")
-  sigs.which <- whichSignatures(tumor.ref = sigs.input, 
-                                signatures.ref = signatures.cosmic, 
-                                sample.id = branch_name,
-                                contexts.needed = TRUE)
-  # get mutational signature with max weight
-  sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
+Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir, mut.threshold){
+  if (length(mut.sig.ref[which(mut.sig.ref$Sample == branch_name), 1]) < mut.threshold){
+    sigs.max <- "No Signature"
+  }else{
+    # deconstructSigs
+    sigs.input <- suppressWarnings(mut.to.sigs.input(mut.ref = mut.sig.ref, 
+                                    sample.id = "Sample", 
+                                    chr = "chr", 
+                                    pos = "pos", 
+                                    ref = "ref", 
+                                    alt = "alt"))
+    sigs.which <- whichSignatures(tumor.ref = sigs.input, 
+                                  signatures.ref = signatures.cosmic, 
+                                  sample.id = branch_name,
+                                  contexts.needed = TRUE)
+    # get mutational signature with max weight
+    sigs.max <- colnames(sigs.which[["weights"]][which.max(sigs.which[["weights"]])])
+  }
   
   # vectorize branch name
   branch <- gsub(paste(patientID,"-",sep=""), "", branch)
@@ -136,8 +141,8 @@ driver_genes_dir <- "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/putati
 
 # sigs <- read.table("/home/ninomoriaty/Nutstore Files/Nutstore/VAF_plot_beta/Mutation_sign/output2.txt", stringsAsFactors=F, quote = "", header = TRUE, fill = TRUE, sep = ' ')
 # 
-maf_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.snv_indel.imputed.maf"
-branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtree.edges"
+# maf_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.snv_indel.imputed.maf"
+# branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtree.edges"
 # 
 # maf_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.snv_indel.imputed.maf"
 # branch_file2 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313544.NJtree.edges"
@@ -145,8 +150,8 @@ branch_file1 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/311252.NJtr
 # maf_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.snv_indel.imputed.maf"
 # branch_file3 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313935.NJtree.edges"
 # 
-# maf_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.snv_indel.imputed.maf"
-# branch_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.NJtree.edges"
+maf_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.snv_indel.imputed.maf"
+branch_file4 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/313953.NJtree.edges"
 # 
 # maf_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.snv_indel.imputed.maf"
 # branch_file5 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314007.NJtree.edges"
