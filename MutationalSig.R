@@ -54,18 +54,19 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
   
   # output collection
   mut.sigs.output <- data.frame()
-  
+  mut.branches <- data.frame()
   # generate mutational signautres for different branches
   for (branch_counter in length(branches):1){
     # generate a single branch
     branch <- Filter(Negate(is.na), branches[[branch_counter]])
     mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample %in% branch), ]
     
-    for (tsb in branch){
-      # generate the intersection(set) of the branch
-      mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
-      mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
-    }
+    # for (tsb in branch){
+    #   # generate the intersection(set) of the branch
+    #   mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
+    #   mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
+    # }
+    
     # generate the branch name
     branch_name <- paste(branch, collapse = "+")
     
@@ -75,9 +76,11 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
     } else{
       # label the intersection(set) of the branch
       mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
+      mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name & !duplicated(mut.sig.ref[,2:5])),]
+      mut.branches <- rbind(mut.branches, mut.branch)
       # get the mutational signature of the branch
       ### However, this part could be optimized as sigs.input should be just calculated once. ###
-      mut.sigs.output <- Mutational_sigs_branch(mut.sig.ref, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir, mut.threshold)
+      mut.sigs.output <- Mutational_sigs_branch(mut.branches, mut.sigs.output, branch, branch_name, patientID, driver_genes, driver_genes_dir, mut.threshold)
     }
     
   }
@@ -118,9 +121,9 @@ Mutational_sigs_branch <- function(mut.sig.ref, mut.sigs.output, branch, branch_
                                    as.character(mut.sig.ref$Hugo_Symbol) %in% driver_genes),]
     pdg.branch <- as.character(pdg.mut$Hugo_Symbol)
     # collect branches' mutataional signature and potative driver genes information
-    mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max, putative_driver_genes = I(list(pdg.branch)))
+    mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max, mut.num = length(mut.sig.ref[which(mut.sig.ref$Sample == branch_name), 1]), putative_driver_genes = I(list(pdg.branch)))
   } else{
-    mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max)
+    mut.sigs.branch <- data.frame(branch = I(list(branch)), mut.sig = sigs.max, mut.num = length(mut.sig.ref[which(mut.sig.ref$Sample == branch_name), 1]))
   }
   # collect branches' mutataional signature information
   rbind(mut.sigs.output, mut.sigs.branch)
@@ -162,20 +165,11 @@ branch_file6 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314069.NJtr
 maf_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.snv_indel.imputed.maf"
 branch_file7 = "/home/ninomoriaty/Nutstore Files/Nutstore/edges_mafs/314155.NJtree.edges"
 
-# Confirm sets of mutation
-# Mutation_sets <- function(mut.sig.ref, branches){
-#   # generate branch name
-#   for (branch_counter in 1:length(branches)){
-#     branch <- Filter(Negate(is.na), branches[,branch_counter])
-#     mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample %in% branch), ]
-#     for (tsb in branch){
-#       mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
-#       mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
-#     }
-#     branch_name <- paste(branch, collapse = "+")
-#     Mutational_sigs_branch(mut.branch, branch_name)
-#     mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
-#   }
-#   mut.sig.ref
-# }
-
+# data.mini
+data.name1 = c("wang","cheng","wei")
+data.power1 = c("end","end","promoter")
+minidata1 = data.frame(name=data.name1, power=data.power1)
+data.name2 = c("wang","cheng","wei")
+data.power2 = c("end","end","promoter2")
+minidata2 = data.frame(name=data.name2, power=data.power2)
+match_df(minidata1, minidata2, on = c("name"))
