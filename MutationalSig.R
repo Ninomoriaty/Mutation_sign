@@ -62,7 +62,7 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
     mut.branch <- mut.sig.ref[which(mut.sig.ref$Sample %in% branch), ]
 
     for (tsb in branch){
-      # generate the intersection(set) of the branch
+      # generate the intersection(set) of the branch(different from duplication)
       mut.tsb <- mut.sig.ref[which(mut.sig.ref$Sample %in% tsb), ]
       mut.branch <- match_df(mut.branch, mut.tsb, on = c("chr", "pos", "pos_end", "ref", "alt"))
     }
@@ -76,6 +76,7 @@ Mutational_sigs_tree <- function(maf_file, branch_file, driver_genes_dir = FALSE
     } else{
       # label the intersection(set) of the branch
       mut.sig.ref[which(mut.sig.ref[,1] %in% mut.branch[,1]), 2] <- branch_name
+      # duplicate the same mutation
       mut.branch.intersection <- mut.sig.ref[which(mut.sig.ref$Sample == branch_name 
                                       & (!duplicated(mut.sig.ref$chr) 
                                       | !duplicated(mut.sig.ref$pos)
