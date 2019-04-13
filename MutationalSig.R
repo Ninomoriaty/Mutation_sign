@@ -3,6 +3,9 @@
 #' barcode from the smallest set. Calcualte each branch's mutational signature weight according to cosmic reference
 #' and pick the maxium. Return a data frame of each set/branch's mutational signature.
 #' 
+#' @import reshape2 BSgenome BSgenome.Hsapiens.UCSC.hg19 GenomeInfoDb grDevices graphics utils deconstructSigs
+#' @import plyr
+#' 
 #' @param maf_file specify a maf document/directory as the input of the function
 #' @param branch_file specify a txt document/directory as the input of the branches (needed to be refined)
 #' @return data frame of each set/branch's mutational signature.
@@ -10,6 +13,8 @@
 #' @examples
 #' \dontrun{
 #' Mutational_sigs_tree(maf_file, branch_file)
+#' Mutational_sigs_tree(maf_file, branch_file, driver_genes_dir)
+#' Mutational_sigs_tree(maf_file, branch_file, driver_genes_dir, mut.threshold = 30)
 #'}
 
 
